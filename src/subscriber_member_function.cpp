@@ -5,6 +5,8 @@
 #include "tutorial_interfaces/msg/num.hpp"                                       // CHANGE
 #include "tutorial_interfaces/msg/ddstype.hpp"                                       // CHANGE
 
+#include "dds/dds.h"
+
 using std::placeholders::_1;
 
 class MinimalSubscriber : public rclcpp::Node
@@ -30,5 +32,12 @@ int main(int argc, char * argv[])
   rclcpp::init(argc, argv);
   rclcpp::spin(std::make_shared<MinimalSubscriber>());
   rclcpp::shutdown();
+
+  dds_entity_t participant;
+  participant = dds_create_participant(0, NULL, NULL);
+  if (participant < 0)
+    printf("Error");
+  printf("YES!");
+
   return 0;
 }

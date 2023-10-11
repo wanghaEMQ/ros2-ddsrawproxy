@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>rawproxy</name>
-  <version>0.0.0</version>
+  <version>0.0.1</version>
   <description>Proxy from ROS2 to DDS</description>
   <maintainer email="wanghaemq@gmail.com">wangha</maintainer>
   <license>Apache License 2.0</license>
@@ -19,5 +19,6 @@
   <depend>rclcpp</depend>
   <depend>std_msgs</depend>
   <depend>tutorial_interfaces</depend>
+  <depend>CycloneDDS</depend>
 
 </package>

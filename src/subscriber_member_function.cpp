@@ -1,9 +1,7 @@
 #include <dds/ddsc/dds_public_impl.h>
 #include <functional>
 #include <memory>
-
 #include <stdio.h>
-#include <pthread.h>
 
 #include "rclcpp/rclcpp.hpp"
 #include "tutorial_interfaces/msg/num.hpp"                                       // CHANGE
@@ -76,7 +74,51 @@ int main(int argc, char * argv[])
   dds_listener_t   *listener;
   /* Create a listener */
   listener = dds_create_listener(NULL);
-  dds_lset_data_available_arg(listener, dds_data_available, cli, true);
+  dds_lset_data_available_arg(listener, dds_data_available, NULL, true);
+
+  dds_entity_t      waitSet;
+  // Create waitSet
+  waitSet = dds_create_waitset(participant);
+
+  dds_qos_t        *qossub;
+  dds_entity_t      subscriber;
+  /* Qos for Subscriber */
+  qossub = dds_create_qos();
+  dds_qset_partition(qossub, 1, partitionsub);
+
+  /* Create the Subscriber */
+  subscriber = dds_create_subscriber(participant, qossub, NULL);
+  if (subscriber < 0)
+    DDS_FATAL("dds_create_subscriber: %s\n", dds_strretcode(-subscriber));
+  dds_delete_qos(qossub);
+
+  // Set wait set
+  int status = dds_waitset_attach(waitSet, waitSet, waitSet);
+  if (status < 0)
+    DDS_FATAL("dds_waitset_attach: %s\n", dds_strretcode(-status));
+
+  dds_entity_t topicr;
+  /* Topic for reader */
+  topicr = dds_create_topic(
+    participant, ddsdesc, DDS2ROS_FROM, NULL, NULL);
+  if (topicr < 0) {
+    DDS_FATAL("dds_create_topic: %s\n", dds_strretcode(-topicr));
+    return topicr;
+  }
+
+  dds_qos_t *qosr;
+  dds_entity_t reader;
+  /* Qos for Reader. */
+  qosr = dds_create_qos();
+  dds_qset_reliability(qosr, DDS_RELIABILITY_RELIABLE, DDS_SECS(10));
+
+  /* Create the Reader */
+  reader = dds_create_reader(subscriber, topicr, qosr, listener);
+  if (reader < 0) {
+    DDS_FATAL("dds_create_reader: %s\n", dds_strretcode(-reader));
+    return reader;
+  }
+  dds_delete_qos(qosr);
 
   dds_entity_t publisher;
   dds_qos_t *  qospub;

@@ -26,17 +26,12 @@ find_package(std_msgs REQUIRED)
 
 find_package(tutorial_interfaces REQUIRED)                      # CHANGE
 
-add_executable(talker src/publisher_member_function.cpp)
-ament_target_dependencies(talker rclcpp std_msgs tutorial_interfaces)
-target_link_libraries(talker CycloneDDS::ddsc)    # CHANGE
-
-add_executable(listener src/subscriber_member_function.cpp)
-ament_target_dependencies(listener rclcpp std_msgs tutorial_interfaces)
-target_link_libraries(listener CycloneDDS::ddsc)    # CHANGE
+add_executable(rawproxy src/subscriber_member_function.cpp)
+ament_target_dependencies(rawproxy rclcpp std_msgs tutorial_interfaces)
+target_link_libraries(rawproxy CycloneDDS::ddsc)    # CHANGE
 
 install(TARGETS
-  talker
-  listener
+  rawproxy
   DESTINATION lib/${PROJECT_NAME})
 
 ament_package()

@@ -26,9 +26,14 @@ find_package(std_msgs REQUIRED)
 
 find_package(tutorial_interfaces REQUIRED)                      # CHANGE
 
+set(IDL_FILE_PATH "${CMAKE_SOURCE_DIR}/Ddstype.idl")
+message("Set default idl file path: ${IDL_FILE_PATH}")
+set(IDL_LIB_NAME "${IDL_FILE_NAME}_lib")
+idlc_generate(TARGET ${IDL_LIB_NAME} FILES ${IDL_FILE_PATH})
+
 add_executable(rawproxy src/subscriber_member_function.cpp)
 ament_target_dependencies(rawproxy rclcpp std_msgs tutorial_interfaces)
-target_link_libraries(rawproxy CycloneDDS::ddsc)    # CHANGE
+target_link_libraries(rawproxy ${IDL_LIB_NAME} CycloneDDS::ddsc)    # CHANGE
 
 install(TARGETS
   rawproxy

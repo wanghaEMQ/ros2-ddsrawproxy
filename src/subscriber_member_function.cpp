@@ -65,6 +65,8 @@ int main(int argc, char * argv[])
 {
   uint32_t rc = 0;
   rclcpp::init(argc, argv);
+  rclcpp::executors::SingleThreadedExecutor executor;
+  auto suber = std::make_shared<MinimalSubscriber>();
 
   participant = dds_create_participant(DOMAINID, NULL, NULL);
   if (participant < 0)
@@ -164,7 +166,8 @@ int main(int argc, char * argv[])
   }
   fprintf(stderr, "YES!");
 
-  rclcpp::spin(std::make_shared<MinimalSubscriber>());
+  executor.add_node(suber);
+  executor.spin();
   rclcpp::shutdown();
 
   return 0;

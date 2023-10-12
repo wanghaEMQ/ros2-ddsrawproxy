@@ -1,7 +1,9 @@
 #include <dds/ddsc/dds_public_impl.h>
 #include <functional>
 #include <memory>
+
 #include <stdio.h>
+#include <pthread.h>
 
 #include "rclcpp/rclcpp.hpp"
 #include "tutorial_interfaces/msg/num.hpp"                                       // CHANGE
@@ -14,29 +16,6 @@
 using std::placeholders::_1;
 
 dds_entity_t writer;
-
-class MinimalSubscriber : public rclcpp::Node
-{
-public:
-  MinimalSubscriber()
-  : Node("minimal_subscriber")
-  {
-    subscription_ = this->create_subscription<tutorial_interfaces::msg::Ddstype>(    // CHANGE
-      "/MQTT/topic1", 10, std::bind(&MinimalSubscriber::topic_callback, this, _1));    // CHANGE
-      // "/MQTT/topic1", rclcpp::QoS(rclcpp::KeepLast(10)).best_effort().transient_local(), std::bind(&MinimalSubscriber::topic_callback, this, _1));    // CHANGE
-  }
-
-private:
-  void topic_callback(const tutorial_interfaces::msg::Ddstype & msg) const  // CHANGE
-  {
-    RCLCPP_INFO_STREAM(this->get_logger(), "Get int32_test: '" << msg.int32_test << "'");     // CHANGE
-	void *sample = malloc(sizeof(msg));
-    memcpy(sample, &msg, sizeof(msg));
-    dds_write(writer, sample);
-	free(sample);
-  }
-  rclcpp::Subscription<tutorial_interfaces::msg::Ddstype>::SharedPtr subscription_;  // CHANGE
-};
 
 #define DOMAINID 0
 
@@ -51,6 +30,38 @@ private:
 static const char *partition[1] = {DDS_PARTITION};
 
 const dds_topic_descriptor_t *ddsdesc = &tutorial_interfaces_msg_Ddstype_desc;
+
+class MinimalSubscriber : public rclcpp::Node
+{
+public:
+  MinimalSubscriber()
+  : Node("minimal_subscriber")
+  {
+    subscription_ = this->create_subscription<tutorial_interfaces::msg::Ddstype>(    // CHANGE
+      ROS2DDS_FROM, 10, std::bind(&MinimalSubscriber::topic_callback, this, _1));    // CHANGE
+      // "/MQTT/topic1", rclcpp::QoS(rclcpp::KeepLast(10)).best_effort().transient_local(), std::bind(&MinimalSubscriber::topic_callback, this, _1));    // CHANGE
+  }
+
+private:
+  void topic_callback(const tutorial_interfaces::msg::Ddstype & msg) const  // CHANGE
+  {
+    RCLCPP_INFO_STREAM(this->get_logger(), "Get int32_test: '" << msg.int32_test << "'");     // CHANGE
+	// ROS2 to DDS
+	void *sample = malloc(sizeof(msg));
+    memcpy(sample, &msg, sizeof(msg));
+    dds_write(writer, sample);
+	free(sample);
+  }
+  rclcpp::Subscription<tutorial_interfaces::msg::Ddstype>::SharedPtr subscription_;  // CHANGE
+};
+
+void *
+dds_to_ros2_cb(void *arg)
+{
+	(void) arg;
+
+	return NULL;
+}
 
 int main(int argc, char * argv[])
 {
@@ -106,6 +117,10 @@ int main(int argc, char * argv[])
     return rc;
   }
   fprintf(stderr, "YES!");
+
+  pthread_t p;
+  // Create thread to handle the msgs from DDS to ROS
+  pthread_create(&p, NULL, dds_to_ros2_cb, NULL);
 
   rclcpp::spin(std::make_shared<MinimalSubscriber>());
   rclcpp::shutdown();

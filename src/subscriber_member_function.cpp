@@ -9,7 +9,11 @@
 
 #include "dds/dds.h"
 
+#include "Ddstype.h"
+
 using std::placeholders::_1;
+
+dds_entity_t writer;
 
 class MinimalSubscriber : public rclcpp::Node
 {
@@ -18,14 +22,18 @@ public:
   : Node("minimal_subscriber")
   {
     subscription_ = this->create_subscription<tutorial_interfaces::msg::Ddstype>(    // CHANGE
-      "/MQTT/topic1", rclcpp::QoS(rclcpp::KeepLast(10)).best_effort().transient_local(), std::bind(&MinimalSubscriber::topic_callback, this, _1));    // CHANGE
+      "/MQTT/topic1", 10, std::bind(&MinimalSubscriber::topic_callback, this, _1));    // CHANGE
+      // "/MQTT/topic1", rclcpp::QoS(rclcpp::KeepLast(10)).best_effort().transient_local(), std::bind(&MinimalSubscriber::topic_callback, this, _1));    // CHANGE
   }
 
 private:
   void topic_callback(const tutorial_interfaces::msg::Ddstype & msg) const  // CHANGE
   {
     RCLCPP_INFO_STREAM(this->get_logger(), "Get int32_test: '" << msg.int32_test << "'");     // CHANGE
-    // dds_write();
+	void *sample = malloc(sizeof(msg));
+    memcpy(sample, &msg, sizeof(msg));
+    dds_write(writer, sample);
+	free(sample);
   }
   rclcpp::Subscription<tutorial_interfaces::msg::Ddstype>::SharedPtr subscription_;  // CHANGE
 };
@@ -38,8 +46,9 @@ private:
 
 #define DDS_PARTITION "testpart"
 
-static const char *partition[1];
-partition[0] = {DDS_PARTITION};
+static const char *partition[1] = {DDS_PARTITION};
+
+const dds_topic_descriptor_t *ddsdesc = &tutorial_interfaces_msg_Ddstype_desc;
 
 int main(int argc, char * argv[])
 {
@@ -68,7 +77,6 @@ int main(int argc, char * argv[])
   uint32_t rc = 0;
   dds_entity_t topicw;
   dds_qos_t *qosw;
-  dds_entity_t writer;
 
   /* Topic for writer */
   topicw = dds_create_topic(
@@ -95,6 +103,7 @@ int main(int argc, char * argv[])
     DDS_FATAL("dds_set_status_mask: %s\n", dds_strretcode(-rc));
     return rc;
   }
+  fprintf(stderr, "YES!");
 
   rclcpp::spin(std::make_shared<MinimalSubscriber>());
   rclcpp::shutdown();

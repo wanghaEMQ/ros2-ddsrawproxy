@@ -38,6 +38,8 @@ private:
   rclcpp::Subscription<tutorial_interfaces::msg::Ddstype>::SharedPtr subscription_;  // CHANGE
 };
 
+#define DOMAINID 0
+
 #define ROS2DDS_FROM "topic1"
 #define ROS2DDS_TO "topic1"
 
@@ -55,7 +57,7 @@ int main(int argc, char * argv[])
   rclcpp::init(argc, argv);
 
   dds_entity_t participant;
-  participant = dds_create_participant(0, NULL, NULL);
+  participant = dds_create_participant(DOMAINID, NULL, NULL);
   if (participant < 0)
     fprintf(stderr, "Error");
   fprintf(stderr, "YES!");

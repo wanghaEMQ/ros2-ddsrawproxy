@@ -16,6 +16,7 @@
 using std::placeholders::_1;
 
 dds_entity_t writer;
+dds_entity_t participant;
 
 #define DOMAINID 0
 
@@ -25,9 +26,11 @@ dds_entity_t writer;
 #define DDS2ROS_FROM "topic2"
 #define DDS2ROS_TO "topic2"
 
-#define DDS_PARTITION "testpart"
+#define DDS_SUB_PARTITION "testpart"
+#define DDS_PUB_PARTITION "testpart"
 
-static const char *partition[1] = {DDS_PARTITION};
+static const char *partitionpub[1] = {DDS_PUB_PARTITION};
+static const char *partitionsub[1] = {DDS_SUB_PARTITION};
 
 const dds_topic_descriptor_t *ddsdesc = &tutorial_interfaces_msg_Ddstype_desc;
 
@@ -55,30 +58,32 @@ private:
   rclcpp::Subscription<tutorial_interfaces::msg::Ddstype>::SharedPtr subscription_;  // CHANGE
 };
 
-void *
-dds_to_ros2_cb(void *arg)
+static void
+dds_data_available(dds_entity_t rd, void *arg)
 {
-	(void) arg;
-
-	return NULL;
 }
 
 int main(int argc, char * argv[])
 {
+  uint32_t rc = 0;
   rclcpp::init(argc, argv);
 
-  dds_entity_t participant;
   participant = dds_create_participant(DOMAINID, NULL, NULL);
   if (participant < 0)
     fprintf(stderr, "Error");
   fprintf(stderr, "YES!");
+
+  dds_listener_t   *listener;
+  /* Create a listener */
+  listener = dds_create_listener(NULL);
+  dds_lset_data_available_arg(listener, dds_data_available, cli, true);
 
   dds_entity_t publisher;
   dds_qos_t *  qospub;
 
   /* Qos for Publisher */
   qospub = dds_create_qos();
-  dds_qset_partition(qospub, 1, partition);
+  dds_qset_partition(qospub, 1, partitionpub);
 
   /* Create the Publisher. */
   publisher = dds_create_publisher(participant, qospub, NULL);
@@ -87,7 +92,6 @@ int main(int argc, char * argv[])
   dds_delete_qos(qospub);
   fprintf(stderr, "YES!");
 
-  uint32_t rc = 0;
   dds_entity_t topicw;
   dds_qos_t *qosw;
 
@@ -117,10 +121,6 @@ int main(int argc, char * argv[])
     return rc;
   }
   fprintf(stderr, "YES!");
-
-  pthread_t p;
-  // Create thread to handle the msgs from DDS to ROS
-  pthread_create(&p, NULL, dds_to_ros2_cb, NULL);
 
   rclcpp::spin(std::make_shared<MinimalSubscriber>());
   rclcpp::shutdown();

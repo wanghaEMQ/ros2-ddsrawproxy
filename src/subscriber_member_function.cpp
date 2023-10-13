@@ -38,7 +38,7 @@ class DDSRawProxy: public rclcpp::Node
 {
 public:
   DDSRawProxy()
-  : Node("minimal_subscriber")
+  : Node("ROS2 DDS Raw Proxy")
   {
     subscription_ = this->create_subscription<tutorial_interfaces::msg::Ddstype>(    // CHANGE
       ROS2DDS_FROM, 10, std::bind(&DDSRawProxy::topic_callback, this, _1));    // CHANGE
@@ -73,7 +73,7 @@ static void
 dds_data_available(dds_entity_t rd, void *arg)
 {
   int rc = 0;
-  DDSRawProxy *suber = reinterpret_cast<DDSRawProxy *>(arg);
+  DDSRawProxy *rawproxy = reinterpret_cast<DDSRawProxy *>(arg);
   dds_sample_info_t infos[MAX_SAMPLES];
 
   void *samples[MAX_SAMPLES];
@@ -90,7 +90,7 @@ dds_data_available(dds_entity_t rd, void *arg)
 	tutorial_interfaces::msg::Ddstype msg;
     memcpy(&msg, samples[0], sizeof(msg));
  
-    suber->sendmsg(msg);
+    rawproxy->sendmsg(msg);
   }
 }
 
@@ -99,7 +99,7 @@ int main(int argc, char * argv[])
   uint32_t rc = 0;
   rclcpp::init(argc, argv);
   rclcpp::executors::SingleThreadedExecutor executor;
-  auto suber = std::make_shared<DDSRawProxy>();
+  auto rawproxy = std::make_shared<DDSRawProxy>();
 
   participant = dds_create_participant(DOMAINID, NULL, NULL);
   if (participant < 0)
@@ -109,7 +109,7 @@ int main(int argc, char * argv[])
   dds_listener_t   *listener;
   // Create a listener
   listener = dds_create_listener(NULL);
-  dds_lset_data_available_arg(listener, dds_data_available, &(*suber), true);
+  dds_lset_data_available_arg(listener, dds_data_available, &(*rawproxy), true);
 
   dds_entity_t      waitSet;
   // Create waitSet
@@ -199,7 +199,7 @@ int main(int argc, char * argv[])
   }
   fprintf(stderr, "YES!");
 
-  executor.add_node(suber);
+  executor.add_node(rawproxy);
   executor.spin();
   rclcpp::shutdown();
 

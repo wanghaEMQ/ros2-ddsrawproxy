@@ -41,6 +41,16 @@ public:
     subscription_ = this->create_subscription<tutorial_interfaces::msg::Ddstype>(    // CHANGE
       ROS2DDS_FROM, 10, std::bind(&MinimalSubscriber::topic_callback, this, _1));    // CHANGE
       // "/MQTT/topic1", rclcpp::QoS(rclcpp::KeepLast(10)).best_effort().transient_local(), std::bind(&MinimalSubscriber::topic_callback, this, _1));    // CHANGE
+    publisher_ = this->create_publisher<tutorial_interfaces::msg::Ddstype>(DDS2ROS_TO, 10);  // CHANGE
+  }
+
+  void sendmsg(const tutorial_interfaces::msg::Ddstype &msg) {
+    // auto message = tutorial_interfaces::msg::Ddstype();                                   // CHANGE
+    // message.int32_test = 11;                                                  // CHANGE
+
+    // const tutorial_interfaces::msg::Ddstype & m = message;
+    RCLCPP_INFO_STREAM(this->get_logger(), "Get int32_test: '" << msg.int32_test << "'");     // CHANGE
+    publisher_->publish(msg);
   }
 
 private:
@@ -54,6 +64,7 @@ private:
 	free(sample);
   }
   rclcpp::Subscription<tutorial_interfaces::msg::Ddstype>::SharedPtr subscription_;  // CHANGE
+  rclcpp::Publisher<tutorial_interfaces::msg::Ddstype>::SharedPtr publisher_;             // CHANGE
 };
 
 static void

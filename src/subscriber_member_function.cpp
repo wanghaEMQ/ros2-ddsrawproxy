@@ -74,9 +74,9 @@ int main(int argc, char * argv[])
   fprintf(stderr, "YES!");
 
   dds_listener_t   *listener;
-  /* Create a listener */
+  // Create a listener
   listener = dds_create_listener(NULL);
-  dds_lset_data_available_arg(listener, dds_data_available, NULL, true);
+  dds_lset_data_available_arg(listener, dds_data_available, &(*suber), true);
 
   dds_entity_t      waitSet;
   // Create waitSet
@@ -84,11 +84,11 @@ int main(int argc, char * argv[])
 
   dds_qos_t        *qossub;
   dds_entity_t      subscriber;
-  /* Qos for Subscriber */
+  // Qos for Subscriber
   qossub = dds_create_qos();
   dds_qset_partition(qossub, 1, partitionsub);
 
-  /* Create the Subscriber */
+  // Create the Subscriber
   subscriber = dds_create_subscriber(participant, qossub, NULL);
   if (subscriber < 0)
     DDS_FATAL("dds_create_subscriber: %s\n", dds_strretcode(-subscriber));
@@ -100,7 +100,7 @@ int main(int argc, char * argv[])
     DDS_FATAL("dds_waitset_attach: %s\n", dds_strretcode(-status));
 
   dds_entity_t topicr;
-  /* Topic for reader */
+  // Topic for reader
   topicr = dds_create_topic(
     participant, ddsdesc, DDS2ROS_FROM, NULL, NULL);
   if (topicr < 0) {
@@ -110,11 +110,11 @@ int main(int argc, char * argv[])
 
   dds_qos_t *qosr;
   dds_entity_t reader;
-  /* Qos for Reader. */
+  // Qos for Reader.
   qosr = dds_create_qos();
   dds_qset_reliability(qosr, DDS_RELIABILITY_RELIABLE, DDS_SECS(10));
 
-  /* Create the Reader */
+  // Create the Reader
   reader = dds_create_reader(subscriber, topicr, qosr, listener);
   if (reader < 0) {
     DDS_FATAL("dds_create_reader: %s\n", dds_strretcode(-reader));
@@ -125,11 +125,11 @@ int main(int argc, char * argv[])
   dds_entity_t publisher;
   dds_qos_t *  qospub;
 
-  /* Qos for Publisher */
+  // Qos for Publisher
   qospub = dds_create_qos();
   dds_qset_partition(qospub, 1, partitionpub);
 
-  /* Create the Publisher. */
+  // Create the Publisher.
   publisher = dds_create_publisher(participant, qospub, NULL);
   if (publisher < 0)
     fprintf(stderr, "Error");
@@ -139,7 +139,7 @@ int main(int argc, char * argv[])
   dds_entity_t topicw;
   dds_qos_t *qosw;
 
-  /* Topic for writer */
+  // Topic for writer
   topicw = dds_create_topic(
     participant, ddsdesc, ROS2DDS_TO, NULL, NULL);
   if (topicw < 0) {
@@ -147,11 +147,11 @@ int main(int argc, char * argv[])
     return topicw;
   }
 
-  /* Qos for Writer */
+  // Qos for Writer
   qosw = dds_create_qos();
   dds_qset_reliability(qosw, DDS_RELIABILITY_RELIABLE, DDS_SECS(10));
 
-  /* Create a Writer */
+  // Create a Writer
   writer = dds_create_writer(publisher, topicw, qosw, NULL);
   if (writer < 0) {
     DDS_FATAL("dds_create_writer: %s\n", dds_strretcode(-writer));

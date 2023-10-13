@@ -34,15 +34,15 @@ static const char *partitionsub[1] = {DDS_SUB_PARTITION};
 
 const dds_topic_descriptor_t *ddsdesc = &tutorial_interfaces_msg_Ddstype_desc;
 
-class MinimalSubscriber : public rclcpp::Node
+class DDSRawProxy: public rclcpp::Node
 {
 public:
-  MinimalSubscriber()
+  DDSRawProxy()
   : Node("minimal_subscriber")
   {
     subscription_ = this->create_subscription<tutorial_interfaces::msg::Ddstype>(    // CHANGE
-      ROS2DDS_FROM, 10, std::bind(&MinimalSubscriber::topic_callback, this, _1));    // CHANGE
-      // "/MQTT/topic1", rclcpp::QoS(rclcpp::KeepLast(10)).best_effort().transient_local(), std::bind(&MinimalSubscriber::topic_callback, this, _1));    // CHANGE
+      ROS2DDS_FROM, 10, std::bind(&DDSRawProxy::topic_callback, this, _1));    // CHANGE
+      // "/MQTT/topic1", rclcpp::QoS(rclcpp::KeepLast(10)).best_effort().transient_local(), std::bind(&DDSRawProxy::topic_callback, this, _1));    // QOS
     publisher_ = this->create_publisher<tutorial_interfaces::msg::Ddstype>(DDS2ROS_TO, 10);  // CHANGE
   }
 
@@ -73,7 +73,7 @@ static void
 dds_data_available(dds_entity_t rd, void *arg)
 {
   int rc = 0;
-  MinimalSubscriber *suber = reinterpret_cast<MinimalSubscriber *>(arg);
+  DDSRawProxy *suber = reinterpret_cast<DDSRawProxy *>(arg);
   dds_sample_info_t infos[MAX_SAMPLES];
 
   void *samples[MAX_SAMPLES];
@@ -99,7 +99,7 @@ int main(int argc, char * argv[])
   uint32_t rc = 0;
   rclcpp::init(argc, argv);
   rclcpp::executors::SingleThreadedExecutor executor;
-  auto suber = std::make_shared<MinimalSubscriber>();
+  auto suber = std::make_shared<DDSRawProxy>();
 
   participant = dds_create_participant(DOMAINID, NULL, NULL);
   if (participant < 0)

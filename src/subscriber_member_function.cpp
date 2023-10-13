@@ -4,7 +4,6 @@
 #include <stdio.h>
 
 #include "rclcpp/rclcpp.hpp"
-#include "tutorial_interfaces/msg/num.hpp"                                       // CHANGE
 #include "tutorial_interfaces/msg/ddstype.hpp"                                       // CHANGE
 
 #include "dds/dds.h"
@@ -38,35 +37,31 @@ class DDSRawProxy: public rclcpp::Node
 {
 public:
   DDSRawProxy()
-  : Node("ROS2 DDS Raw Proxy")
+  : Node("ROS2_DDS_Raw_Proxy")
   {
     subscription_ = this->create_subscription<tutorial_interfaces::msg::Ddstype>(    // CHANGE
       ROS2DDS_FROM, 10, std::bind(&DDSRawProxy::topic_callback, this, _1));    // CHANGE
       // "/MQTT/topic1", rclcpp::QoS(rclcpp::KeepLast(10)).best_effort().transient_local(), std::bind(&DDSRawProxy::topic_callback, this, _1));    // QOS
     publisher_ = this->create_publisher<tutorial_interfaces::msg::Ddstype>(DDS2ROS_TO, 10);  // CHANGE
+    RCLCPP_INFO_STREAM(this->get_logger(), "ROS2 Node Inited");
   }
 
   void sendmsg(const tutorial_interfaces::msg::Ddstype &msg) {
-    // auto message = tutorial_interfaces::msg::Ddstype();                                   // CHANGE
-    // message.int32_test = 11;                                                  // CHANGE
-
-    // const tutorial_interfaces::msg::Ddstype & m = message;
-    RCLCPP_INFO_STREAM(this->get_logger(), "Get int32_test: '" << msg.int32_test << "'");     // CHANGE
     publisher_->publish(msg);
   }
 
 private:
-  void topic_callback(const tutorial_interfaces::msg::Ddstype & msg) const  // CHANGE
+  void topic_callback(const tutorial_interfaces::msg::Ddstype & msg) const
   {
-    RCLCPP_INFO_STREAM(this->get_logger(), "Get int32_test: '" << msg.int32_test << "'");     // CHANGE
+    RCLCPP_INFO_STREAM(this->get_logger(), "ROS2 ===> DDS. int32_test " << msg.int32_test);
 	// ROS2 to DDS
 	void *sample = malloc(sizeof(msg));
     memcpy(sample, &msg, sizeof(msg));
     dds_write(writer, sample);
 	free(sample);
   }
-  rclcpp::Subscription<tutorial_interfaces::msg::Ddstype>::SharedPtr subscription_;  // CHANGE
-  rclcpp::Publisher<tutorial_interfaces::msg::Ddstype>::SharedPtr publisher_;             // CHANGE
+  rclcpp::Subscription<tutorial_interfaces::msg::Ddstype>::SharedPtr subscription_;
+  rclcpp::Publisher<tutorial_interfaces::msg::Ddstype>::SharedPtr publisher_;
 };
 
 static void
@@ -80,15 +75,14 @@ dds_data_available(dds_entity_t rd, void *arg)
   samples[0] = malloc(sizeof(tutorial_interfaces::msg::Ddstype));
 
   rc = dds_take(rd, samples, infos, MAX_SAMPLES, MAX_SAMPLES);
-  fprintf(stderr, "I got something.");
   if (rc < 0)
     DDS_FATAL("dds_take: %s\n", dds_strretcode(-rc));
 
   if ((rc > 0) && (infos[0].valid_data)) {
     // DDS to ROS2
-    fprintf(stderr, "forwarding.");
 	tutorial_interfaces::msg::Ddstype msg;
     memcpy(&msg, samples[0], sizeof(msg));
+    fprintf(stderr, "ROS2 <=== DDS. int32_test %d\n", msg.int32_test);
  
     rawproxy->sendmsg(msg);
   }
@@ -104,7 +98,6 @@ int main(int argc, char * argv[])
   participant = dds_create_participant(DOMAINID, NULL, NULL);
   if (participant < 0)
     fprintf(stderr, "Error");
-  fprintf(stderr, "YES!");
 
   dds_listener_t   *listener;
   // Create a listener
@@ -164,10 +157,11 @@ int main(int argc, char * argv[])
 
   // Create the Publisher.
   publisher = dds_create_publisher(participant, qospub, NULL);
-  if (publisher < 0)
-    fprintf(stderr, "Error");
+  if (publisher < 0) {
+    DDS_FATAL("dds_create_publisher: %s\n", dds_strretcode(-publisher));
+    return publisher;
+  }
   dds_delete_qos(qospub);
-  fprintf(stderr, "YES!");
 
   dds_entity_t topicw;
   dds_qos_t *qosw;
@@ -197,7 +191,7 @@ int main(int argc, char * argv[])
     DDS_FATAL("dds_set_status_mask: %s\n", dds_strretcode(-rc));
     return rc;
   }
-  fprintf(stderr, "YES!");
+  fprintf(stderr, "DDS Node Inited!\n");
 
   executor.add_node(rawproxy);
   executor.spin();

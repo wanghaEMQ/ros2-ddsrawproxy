@@ -4,16 +4,19 @@
 #include <stdio.h>
 
 #include "rclcpp/rclcpp.hpp"
-#include "tutorial_interfaces/msg/ddstype.hpp"                                       // CHANGE
-
 #include "dds/dds.h"
-
-#include "Ddstype.h"
 
 using std::placeholders::_1;
 
 dds_entity_t writer;
 dds_entity_t participant;
+
+#include "Ddstype.h" // CHANGE
+#include "tutorial_interfaces/msg/ddstype.hpp" // CHANGE
+
+#define NAMESPACE tutorial_interfaces::msg
+#define DDSTYPE Ddstype
+#define DDSTYPE_DESC tutorial_interfaces_msg_Ddstype_desc
 
 #define MAX_SAMPLES 1
 
@@ -31,7 +34,7 @@ dds_entity_t participant;
 static const char *partitionpub[1] = {DDS_PUB_PARTITION};
 static const char *partitionsub[1] = {DDS_SUB_PARTITION};
 
-const dds_topic_descriptor_t *ddsdesc = &tutorial_interfaces_msg_Ddstype_desc;
+const dds_topic_descriptor_t *ddsdesc = &DDSTYPE_DESC;
 
 class DDSRawProxy: public rclcpp::Node
 {
@@ -39,19 +42,19 @@ public:
   DDSRawProxy()
   : Node("ROS2_DDS_Raw_Proxy")
   {
-    subscription_ = this->create_subscription<tutorial_interfaces::msg::Ddstype>(    // CHANGE
-      ROS2DDS_FROM, 10, std::bind(&DDSRawProxy::topic_callback, this, _1));    // CHANGE
+    subscription_ = this->create_subscription<NAMESPACE::DDSTYPE>(
+      ROS2DDS_FROM, 10, std::bind(&DDSRawProxy::topic_callback, this, _1));
       // "/MQTT/topic1", rclcpp::QoS(rclcpp::KeepLast(10)).best_effort().transient_local(), std::bind(&DDSRawProxy::topic_callback, this, _1));    // QOS
-    publisher_ = this->create_publisher<tutorial_interfaces::msg::Ddstype>(DDS2ROS_TO, 10);  // CHANGE
+    publisher_ = this->create_publisher<NAMESPACE::DDSTYPE>(DDS2ROS_TO, 10);
     RCLCPP_INFO_STREAM(this->get_logger(), "ROS2 Node Inited");
   }
 
-  void sendmsg(const tutorial_interfaces::msg::Ddstype &msg) {
+  void sendmsg(const NAMESPACE::DDSTYPE &msg) {
     publisher_->publish(msg);
   }
 
 private:
-  void topic_callback(const tutorial_interfaces::msg::Ddstype & msg) const
+  void topic_callback(const NAMESPACE::DDSTYPE & msg) const
   {
     RCLCPP_INFO_STREAM(this->get_logger(), "ROS2 ===> DDS. int32_test " << msg.int32_test);
 	// ROS2 to DDS
@@ -60,8 +63,8 @@ private:
     dds_write(writer, sample);
 	free(sample);
   }
-  rclcpp::Subscription<tutorial_interfaces::msg::Ddstype>::SharedPtr subscription_;
-  rclcpp::Publisher<tutorial_interfaces::msg::Ddstype>::SharedPtr publisher_;
+  rclcpp::Subscription<NAMESPACE::DDSTYPE>::SharedPtr subscription_;
+  rclcpp::Publisher<NAMESPACE::DDSTYPE>::SharedPtr publisher_;
 };
 
 static void
@@ -72,7 +75,7 @@ dds_data_available(dds_entity_t rd, void *arg)
   dds_sample_info_t infos[MAX_SAMPLES];
 
   void *samples[MAX_SAMPLES];
-  samples[0] = malloc(sizeof(tutorial_interfaces::msg::Ddstype));
+  samples[0] = malloc(sizeof(NAMESPACE::DDSTYPE));
 
   rc = dds_take(rd, samples, infos, MAX_SAMPLES, MAX_SAMPLES);
   if (rc < 0)
@@ -80,7 +83,7 @@ dds_data_available(dds_entity_t rd, void *arg)
 
   if ((rc > 0) && (infos[0].valid_data)) {
     // DDS to ROS2
-	tutorial_interfaces::msg::Ddstype msg;
+	NAMESPACE::DDSTYPE msg;
     memcpy(&msg, samples[0], sizeof(msg));
     fprintf(stderr, "ROS2 <=== DDS. int32_test %d\n", msg.int32_test);
  

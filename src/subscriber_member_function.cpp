@@ -72,6 +72,26 @@ private:
 static void
 dds_data_available(dds_entity_t rd, void *arg)
 {
+  int rc = 0;
+  MinimalSubscriber *suber = reinterpret_cast<MinimalSubscriber *>(arg);
+  dds_sample_info_t infos[MAX_SAMPLES];
+
+  void *samples[MAX_SAMPLES];
+  samples[0] = malloc(sizeof(tutorial_interfaces::msg::Ddstype));
+
+  rc = dds_take(rd, samples, infos, MAX_SAMPLES, MAX_SAMPLES);
+  fprintf(stderr, "I got something.");
+  if (rc < 0)
+    DDS_FATAL("dds_take: %s\n", dds_strretcode(-rc));
+
+  if ((rc > 0) && (infos[0].valid_data)) {
+    // DDS to ROS2
+    fprintf(stderr, "forwarding.");
+	tutorial_interfaces::msg::Ddstype msg;
+    memcpy(&msg, samples[0], sizeof(msg));
+ 
+    suber->sendmsg(msg);
+  }
 }
 
 int main(int argc, char * argv[])

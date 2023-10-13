@@ -16,13 +16,15 @@ using std::placeholders::_1;
 dds_entity_t writer;
 dds_entity_t participant;
 
+#define MAX_SAMPLES 1
+
 #define DOMAINID 0
 
-#define ROS2DDS_FROM "topic1"
+#define ROS2DDS_FROM "/MQTTCMD/topic1"
 #define ROS2DDS_TO "topic1"
 
 #define DDS2ROS_FROM "topic2"
-#define DDS2ROS_TO "topic2"
+#define DDS2ROS_TO "/MQTT/topic1"
 
 #define DDS_SUB_PARTITION "testpart"
 #define DDS_PUB_PARTITION "testpart"

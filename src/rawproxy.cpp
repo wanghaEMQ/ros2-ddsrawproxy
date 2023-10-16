@@ -99,8 +99,10 @@ int main(int argc, char * argv[])
   auto rawproxy = std::make_shared<DDSRawProxy>();
 
   participant = dds_create_participant(DOMAINID, NULL, NULL);
-  if (participant < 0)
-    fprintf(stderr, "Error");
+  if (participant < 0) {
+    DDS_FATAL("dds_create_participant: %s\n", dds_strretcode(-participant));
+    return participant;
+  }
 
   dds_listener_t   *listener;
   // Create a listener

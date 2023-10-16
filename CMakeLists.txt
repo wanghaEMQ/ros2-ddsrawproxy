@@ -11,12 +11,7 @@ find_package(CycloneDDS REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # comment the line when a copyright and license is added to all source files
   set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # comment the line when this package is in a git repo and when
-  # a copyright and license is added to all source files
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
@@ -31,7 +26,7 @@ set(IDL_LIB_NAME "${IDL_FILE_NAME}_lib")
 idlc_generate(TARGET ${IDL_LIB_NAME} FILES ${IDL_FILE_PATH})
 
 add_executable(rawproxy src/rawproxy.cpp)
-ament_target_dependencies(rawproxy rclcpp std_msgs nanomq_if)
+ament_target_dependencies(rawproxy rclcpp nanomq_if)
 target_link_libraries(rawproxy ${IDL_LIB_NAME} CycloneDDS::ddsc)    # CHANGE
 
 install(TARGETS

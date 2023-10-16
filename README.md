@@ -16,15 +16,15 @@ git clone https://github.com/wanghaEMQ/ros2-ddsrawproxy.git
 
 ```
 cd /path/to/ros2_ws/src
-ros2 pkg create --build-type ament_cmake tutorial_interfaces
+ros2 pkg create --build-type ament_cmake nanomq_if
 ```
 
 ### Prepare your .msg
 
-Here we use a .msg from tutorial as an exmaple
+Here we provide a Ddstype.msg as an exmaple
 
 ```
-cd tutorial_interfaces
+cd nanomq_if
 mkdir msg
 echo "bool      bool_test
 int8      int8_test
@@ -42,13 +42,13 @@ float64   float64_test
 uint8[256] message" > msg/Ddstype.msg
 ```
 
-### Create your cmakelists.txt and package.xml
+### Edit your CMakeLists.txt and package.xml
 
-cmakelists.txx
+CMakeLists.txt
 
 ```
 cmake_minimum_required(VERSION 3.8)
-project(tutorial_interfaces)
+project(nanomq_if)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -79,10 +79,10 @@ Package.xml
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>tutorial_interfaces</name>
+  <name>nanomq_if</name>
   <version>0.0.0</version>
-  <description>Test msg</description>
-  <maintainer email="wanghaemq@gmail.com">wangha</maintainer>
+  <description>Test msg from NanoMQ</description>
+  <maintainer email="wanghamax@gmail.com">wangha</maintainer>
   <license>TODO: License declaration</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
@@ -105,9 +105,9 @@ Package.xml
 
 ```
 cd /path/to/ros2_ws/src
-colcon build --packages-select tutorial_interfaces
+colcon build --packages-select nanomq_if
 source install/setup.bash
-ros2 interface show tutorial_interfaces/msg/Ddstype
+ros2 interface show nanomq_if/msg/Ddstype
 ```
 
 ### Find the .idl and copy to ddsrawproxy project
@@ -120,14 +120,14 @@ find . -iname "Ddstype.idl"
 The result might be
 
 ```
-./install/tutorial_interfaces/share/tutorial_interfaces/msg/Ddstype.idl
-./build/tutorial_interfaces/rosidl_adapter/tutorial_interfaces/msg/Ddstype.idl
+./install/nanomq_if/share/nanomq_if/msg/Ddstype.idl
+./build/nanomq_if/rosidl_adapter/nanomq_if/msg/Ddstype.idl
 ```
 
 Now. Copy to this project.
 
 ```
-cp ./install/tutorial_interfaces/share/tutorial_interfaces/msg/Ddstype.idl /path/to/ros2-ddsrawproxy/Ddstype.idl
+cp ./install/nanomq_if/share/nanomq_if/msg/Ddstype.idl /path/to/ros2-ddsrawproxy/Ddstype.idl
 ```
 
 ### Build ROS2DDSRawProxy
@@ -140,7 +140,7 @@ colcon build --packages-select ros2-ddsrawproxy
 ### Start ROS2DDSRawProxy
 
 ```
-source ./install/setup.zsh
+source ./install/setup.bash
 ros2 run rawproxy rawproxy
 ```
 

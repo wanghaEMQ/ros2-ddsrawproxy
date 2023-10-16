@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.8)
 project(rawproxy)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
+  add_compile_options(-Wall -Wextra -Wpedantic -g)
 endif()
 
 # find dependencies
@@ -22,7 +22,6 @@ if(BUILD_TESTING)
 endif()
 
 find_package(rclcpp REQUIRED)
-find_package(std_msgs REQUIRED)
 
 find_package(nanomq_if REQUIRED)                      # CHANGE
 
@@ -31,7 +30,7 @@ message("Set default idl file path: ${IDL_FILE_PATH}")
 set(IDL_LIB_NAME "${IDL_FILE_NAME}_lib")
 idlc_generate(TARGET ${IDL_LIB_NAME} FILES ${IDL_FILE_PATH})
 
-add_executable(rawproxy src/subscriber_member_function.cpp)
+add_executable(rawproxy src/rawproxy.cpp)
 ament_target_dependencies(rawproxy rclcpp std_msgs nanomq_if)
 target_link_libraries(rawproxy ${IDL_LIB_NAME} CycloneDDS::ddsc)    # CHANGE
 

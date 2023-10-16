@@ -4,7 +4,7 @@
   <name>rawproxy</name>
   <version>0.0.1</version>
   <description>Proxy from ROS2 to DDS</description>
-  <maintainer email="wanghaemq@gmail.com">wangha</maintainer>
+  <maintainer email="wanghamax@gmail.com">wangha</maintainer>
   <license>Apache License 2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
@@ -17,8 +17,7 @@
   </export>
 
   <depend>rclcpp</depend>
-  <depend>std_msgs</depend>
-  <depend>tutorial_interfaces</depend>
+  <depend>nanomq_if</depend>
   <depend>CycloneDDS</depend>
 
 </package>

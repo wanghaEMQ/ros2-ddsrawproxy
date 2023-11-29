@@ -12,11 +12,11 @@ dds_entity_t writer;
 dds_entity_t participant;
 
 #include "Ddstype.h" // CHANGE
-#include "nanomq_if/msg/ddstype.hpp" // CHANGE
+#include "tutorial_interfaces/msg/ddstype.hpp" // CHANGE
 
-#define NAMESPACE nanomq_if::msg
+#define NAMESPACE tutorial_interfaces::msg
 #define DDSTYPE Ddstype
-#define DDSTYPE_DESC nanomq_if_msg_Ddstype_desc
+#define DDSTYPE_DESC tutorial_interfaces_msg_Ddstype_desc
 
 #define MAX_SAMPLES 1
 

@@ -16,7 +16,7 @@ git clone https://github.com/wanghaEMQ/ros2-ddsrawproxy.git
 
 ```
 cd /path/to/ros2_ws/src
-ros2 pkg create --build-type ament_cmake nanomq_if
+ros2 pkg create --build-type ament_cmake tutorial_interfaces
 ```
 
 ### Prepare your .msg
@@ -24,7 +24,7 @@ ros2 pkg create --build-type ament_cmake nanomq_if
 Here we provide a Ddstype.msg as an exmaple
 
 ```
-cd nanomq_if
+cd tutorial_interfaces
 mkdir msg
 echo "bool      bool_test
 int8      int8_test
@@ -48,7 +48,7 @@ CMakeLists.txt
 
 ```
 cmake_minimum_required(VERSION 3.8)
-project(nanomq_if)
+project(tutorial_interfaces)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -79,7 +79,7 @@ Package.xml
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>nanomq_if</name>
+  <name>tutorial_interfaces</name>
   <version>0.0.0</version>
   <description>Test msg from NanoMQ</description>
   <maintainer email="wanghamax@gmail.com">wangha</maintainer>
@@ -105,9 +105,9 @@ Package.xml
 
 ```
 cd /path/to/ros2_ws/src
-colcon build --packages-select nanomq_if
+colcon build --packages-select tutorial_interfaces
 source install/setup.bash
-ros2 interface show nanomq_if/msg/Ddstype
+ros2 interface show tutorial_interfaces/msg/Ddstype
 ```
 
 ### Find the .idl and copy to ddsrawproxy project
@@ -120,14 +120,14 @@ find . -iname "Ddstype.idl"
 The result might be
 
 ```
-./install/nanomq_if/share/nanomq_if/msg/Ddstype.idl
-./build/nanomq_if/rosidl_adapter/nanomq_if/msg/Ddstype.idl
+./install/tutorial_interfaces/share/tutorial_interfaces/msg/Ddstype.idl
+./build/tutorial_interfaces/rosidl_adapter/tutorial_interfaces/msg/Ddstype.idl
 ```
 
 Now. Copy to this project.
 
 ```
-cp ./install/nanomq_if/share/nanomq_if/msg/Ddstype.idl /path/to/ros2-ddsrawproxy/Ddstype.idl
+cp ./install/tutorial_interfaces/share/tutorial_interfaces/msg/Ddstype.idl /path/to/ros2-ddsrawproxy/Ddstype.idl
 ```
 
 ### Build ROS2DDSRawProxy

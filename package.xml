@@ -17,7 +17,7 @@
   </export>
 
   <depend>rclcpp</depend>
-  <depend>nanomq_if</depend>
+  <depend>tutorial_interfaces</depend>
   <depend>CycloneDDS</depend>
 
 </package>
